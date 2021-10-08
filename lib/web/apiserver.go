@@ -726,7 +726,6 @@ func (h *Handler) ping(w http.ResponseWriter, r *http.Request, p httprouter.Para
 		Proxy:            h.cfg.ProxySettings,
 		ServerVersion:    teleport.Version,
 		MinClientVersion: teleport.MinClientVersion,
-		ClientAddr:       r.RemoteAddr,
 	}, nil
 }
 
@@ -735,7 +734,6 @@ func (h *Handler) find(w http.ResponseWriter, r *http.Request, p httprouter.Para
 		Proxy:            h.cfg.ProxySettings,
 		ServerVersion:    teleport.Version,
 		MinClientVersion: teleport.MinClientVersion,
-		ClientAddr:       r.RemoteAddr,
 	}, nil
 }
 
@@ -751,7 +749,6 @@ func (h *Handler) pingWithConnector(w http.ResponseWriter, r *http.Request, p ht
 	response := &webclient.PingResponse{
 		Proxy:         h.cfg.ProxySettings,
 		ServerVersion: teleport.Version,
-		ClientAddr:    r.RemoteAddr,
 	}
 
 	if connectorName == constants.Local {
