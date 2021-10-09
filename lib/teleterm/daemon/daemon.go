@@ -20,6 +20,7 @@ import (
 
 	"github.com/gravitational/trace"
 	"github.com/jonboulle/clockwork"
+	"github.com/sirupsen/logrus"
 
 	"github.com/gravitational/teleport/lib/teleterm/api/uri"
 
@@ -35,6 +36,8 @@ type Config struct {
 	Clock clockwork.Clock
 	// InsecureSkipVerify is an option to skip HTTPS cert check
 	InsecureSkipVerify bool
+	// Log is a component logger
+	Log *logrus.Entry
 }
 
 // CheckAndSetDefaults checks the configuration for its validity and sets default values if needed
@@ -45,6 +48,10 @@ func (c *Config) CheckAndSetDefaults() error {
 
 	if c.Clock == nil {
 		c.Clock = clockwork.NewRealClock()
+	}
+
+	if c.Log == nil {
+		c.Log = logrus.NewEntry(logrus.StandardLogger()).WithField(trace.Component, "daemon")
 	}
 
 	return nil
@@ -99,8 +106,8 @@ func (s *Service) GetCluster(clusterURI string) (*Cluster, error) {
 	return nil, trace.NotFound("cluster is not found: %v", clusterURI)
 }
 
-// LoadClusters loads clusters from saved profiles
-func (s *Service) LoadClusters() error {
+// Init loads clusters from saved profiles
+func (s *Service) Init() error {
 	pfNames, err := profile.ListProfileNames(s.Dir)
 	if err != nil {
 		return trace.Wrap(err)
@@ -181,6 +188,10 @@ func (s *Service) newClusterFromProfile(name string) (*Cluster, error) {
 
 	// load profile status if key exists
 	_, err = clt.LocalAgent().GetKey(name)
+	if err != nil {
+		s.Log.WithError(err).Info("Unable to load the keys for cluster %v.", name)
+	}
+
 	if err == nil && cfg.Username != "" {
 		status, err = client.StatusFromFile(s.Dir, name)
 		if err != nil {

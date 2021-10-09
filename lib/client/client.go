@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
@@ -1488,6 +1489,9 @@ func (proxy *ProxyClient) currentCluster() (*types.Site, error) {
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
+
+	fmt.Print("AAAAAAAAAAAAAAAAA:", sites)
+
 	if len(sites) == 0 {
 		return nil, trace.NotFound("no clusters registered")
 	}
